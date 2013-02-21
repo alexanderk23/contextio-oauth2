@@ -51,8 +51,9 @@ class ContextIO(httplib2.Http):
         params['oauth_timestamp'] = '%s' % int(time.time())
 
         queryString = ''
+        no_body = action.lower() in ['get', 'delete']
 
-        if action.lower() == 'get':
+        if no_body:
             queryString = urllib.urlencode(context)
             url += '?'+queryString
         else:
@@ -64,9 +65,9 @@ class ContextIO(httplib2.Http):
         signature_method = oauth2.SignatureMethod_HMAC_SHA1()
         req.sign_request(signature_method, self.consumer, None)
         
-        body = '' if action.lower() == 'get' else req.to_postdata()
-        headers = {} if action.lower() == 'get' else {'Content-Type': 'application/x-www-form-urlencoded'}
-        url = req.to_url() if action.lower() == 'get' else url
+        body = '' if no_body else req.to_postdata()
+        headers = {} if no_body else {'Content-Type': 'application/x-www-form-urlencoded'}
+        url = req.to_url() if no_body else url
         
         response, content = super(ContextIO, self).request(url,
                                         method=action,
